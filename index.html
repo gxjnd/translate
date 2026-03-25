@@ -639,7 +639,13 @@ function clear_mul() {
 
 
 
-
+// 只有在用户与页面产生过交互（点击、输入）后，此拦截才会生效
+window.addEventListener('beforeunload', (event) => {
+    // 现代浏览器不再支持自定义文字，只能触发系统默认提示
+    event.preventDefault();
+    event.returnValue = ''; 
+});
+      
 </script>
 
 </body>
