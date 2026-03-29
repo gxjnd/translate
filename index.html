@@ -1,0 +1,1204 @@
+
+<html>
+<head>
+  
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+
+
+<style type="text/css">
+* {
+box-sizing: border-box;
+-webkit-tap-highlight-color: transparent;
+
+}
+body{
+  margin:0;
+padding:0;
+  
+}
+
+.header-placeholder {
+    height: 32px; /* 与 header 同高 */
+    visibility: hidden; /* 隐藏但占据空间 */
+}
+
+        .status-bar {
+            /* 关键：固定在顶部 */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 32px;
+            
+            /* 布局：水平分布 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            
+            /* 视觉效果 */
+            
+            background-color: rgba(255, 255, 255, 0.9); /* 半透明白色 */
+            backdrop-filter: blur(10px);               /* 毛玻璃效果 */
+            border-bottom: 0px solid #e0e0e0;
+            
+            z-index: 9999;                             /* 确保层级最高 */
+        }
+
+        /* 左侧：时间/返回 */
+        .status-left {
+          
+            width:10px;
+            height:100%;
+            font-size:14px;
+            font-weight: 800;
+            background:#1e1e1e;
+            color: #cccccc;
+            display: flex;
+            align-items: center;
+        }
+#mode_display{
+  
+          
+}
+        /* 中间：标题 */
+        .status-center {
+          width:100%;
+            height:100%;
+            
+          
+          font-size:14px;
+background: #1e1e1e;       /* 深色主题（VS Code 风格） */
+  color: #cccccc;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+        }
+
+        /* 右侧：图标 */
+        .status-right {
+          
+            width:40px;
+            height:100%;
+            background:#1e1e1e;       /* 深色主题（VS Code 风格） */
+  color: #cccccc;
+            
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+.separator {
+  color: #555;
+  margin: 0 4px;
+}
+
+/* 不同部分的颜色区分 */
+.clip-info { color: #9cdcfe; }
+.insert-info { color: red; }
+.fast-info  { color: green; }
+
+/* 活跃/警告状态高亮 */
+.active {
+  color: green !important;
+  font-weight: bold;
+  
+}
+.active_fast {
+  color: red !important;
+  font-weight: bold;
+  
+}
+
+.warning {
+  color: #f48771 !important;
+  
+}
+
+/* 呼吸灯动画（用于 stop fast 警告） */
+
+
+/*
+ --------------------------------------------------------------------------------- 
+  
+*/
+  .textarea_txt{
+    overflow:scroll;
+    margin:10px;
+  font-size: 20px;
+  }
+
+.textarea_txt:focus {
+    outline: none; /* 去除默认的蓝色外框 */
+}
+
+  
+  .div_p{
+  margin-top: 5.5px;
+  margin-left: 10px;
+  }
+  .ta2{
+  margin-right: 55px;
+  border: 0px solid #DCDCDC;
+  user-select: none;
+  }
+  .ta2_copy{
+    /*margin-right: 10px !important;*/
+  }
+
+  .slide-two{
+  background-color: white;
+  border: 1px solid #DCDCDC;
+  font-size: 25px;
+  color:black;
+  outline: none;
+  }
+  #cp{
+    
+  animation:blinkingText 0.3s 0;
+  }
+  #eng{
+  animation:blinkingText 0.3s 0;
+  }  
+
+  .btn_e_p.row3 {
+  
+  position: absolute;
+  top:295px;
+  right:10px;
+  background:#1e1e1e;
+  width: 120px;
+  height: 40px;
+  z-index:999999;
+  display:none;
+  align-items: center;
+  border-radius: 2px;
+  overflow-x :auto;
+  }
+  .btn_plus {
+  
+  margin-left:5px; 
+  height: 33px;
+  line-height: 33px;
+  width: 33px;
+  font-size: 2em;
+  font-weight: bold;
+  border-radius: 4px;
+  background-color:#E9EAEC;
+  
+  text-align: center;
+  /* cursor: pointer;*/
+  
+  
+  }
+  .btn_mul {
+  
+  
+  
+  margin-left:5px; 
+  height: 33px;
+  line-height: 33px;
+  width: 33px; 
+  font-size: 2em;
+  font-weight: bold;
+  border-radius: 4px;
+  background-color: #E9EAEC;
+  color: green;
+  text-align: center;
+  display: none;
+    
+  /* cursor: pointer;*/
+  user-select: none;
+  
+  }
+  
+
+
+
+  
+  .p_size{
+  font-size: 25px;
+  
+  }
+  #doc{
+  color: #000;
+  }
+  
+  
+
+  @keyframes blinkingText{
+  0%{     color: #000;    }
+  49%{    color: #000; }
+  49%{    color: transparent; }
+  60%{    color: transparent; }
+  100%{    color: #000; }
+  
+  }
+  @keyframes blinkingText_2{
+  0%{     color: #00FF00;    }
+  49%{    color: #00FF00; }
+  49%{    color: transparent; }
+  60%{    color: transparent; }
+  100%{    color: #000; }
+  
+  }
+  @keyframes blinkingText_3{
+  0%{     background-color: #4CAF50;    }
+  49%{    background-color: #4CAF50; }
+  49%{    background-color: red; }
+  60%{    background-color: red; }
+  100%{    background-color: #4CAF50; }
+  
+  }
+  
+  
+
+  .endsigns{
+  color: "green";
+  }
+  
+  /*
+---------------------------------------------------------------------------------
+*/
+
+</style>
+
+<style type="text/css">
+        /* 模态框通用样式 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.45);
+            display: none;
+            align-items: flex-start;
+            justify-content: flex-end;   /* 关键：右上角对齐 */
+            z-index: 1000;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            animation: modalPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes modalPop {
+            from {
+                opacity: 0;
+                transform: scale(0.92) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* 第一层列表（右上角弹出） */
+        #firstModal .modal-content {
+            position: absolute;
+            top: 38px;           /* 紧贴状态栏下方 */
+            right: 12px;         /* 右上角关键定位 */
+            width: 150px;
+            max-height: 78vh;
+            border-radius: 14px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
+        }
+
+        .list-container {
+            padding: 8px 0;
+        }
+
+        .list-item {
+            width: 100%;
+            padding: 14px 24px;
+            text-align: left;
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            font-weight: 400;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .list-item:hover {
+            background: #f1f5f9;
+        }
+
+        /* Buffer 特殊项高亮 */
+        .buffer-item {
+            background: #eff6ff;
+            color: #1e40af;
+            font-weight: 500;
+        }
+
+        /* 第二层 Buffer 对话框（居中） */
+        #bufferModal .modal-content {
+            width: 360px;
+            max-height: 300px;
+            margin: 40px auto 0;
+            border-radius: 4px;
+        }
+
+        .modal-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid #f1f1f1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 30px;
+            color: #9ca3af;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .buffer-item-list {
+            padding: 12px 8px;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .buffer-single-item {
+            padding: 16px 20px;
+            margin: 6px 8px;
+            border-radius: 14px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 15px;
+            line-height: 1.5;
+            word-break: break-all;
+        }
+
+        .buffer-single-item:hover {
+            border-color: #3b82f6;
+            background: #f0f9ff;
+        }
+
+        .item-number {
+            font-family: monospace;
+            color: #64748b;
+            font-size: 13px;
+            min-width: 26px;
+        }
+
+</style>
+
+
+</head>
+<body>
+
+    <header class="status-bar" translate="no">
+        <div class="status-left">
+
+        </div>
+        
+        <div class="status-center" id="status_main">
+      
+          <span id="mode_display">2</span>
+          <span class="separator">|</span> 
+          
+          <span class="clip-info" id="clip-infoz">...</span> 
+          <span class="separator">|</span> 
+          <span class="insert-info " id="insert_toggle">insert</span> 
+          <span class="separator">|</span> 
+          <span class="fast-info " id="fast_toggle">fast</span>
+
+        </div>
+        
+        <div class="status-right" id="morez">
+        <svg width="26px" height="26px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="12" cy="6" r="1.5" fill="#fff"/>
+<circle cx="12" cy="12" r="1.5" fill="#fff"/>
+<circle cx="12" cy="18" r="1.5" fill="#fff"/>
+</svg>  
+
+        </div>
+    </header>
+
+
+<!-----------------------------------------------------------------------------------   -->
+
+<div class="header-placeholder"></div> 
+
+
+<textarea  rows="10" cols="30" wrap="off" 
+class="textarea_txt" name="raw_txt" id = "raw" oninput="hit_textarea()"></textarea>
+
+
+
+<div class= "div_p row1" >
+  <span class="ta2">
+    <button type="button" id="submit" class="slide-two"  onclick="hit()">translate</button>
+  </span>
+  <span class="ta2">
+    <button type="button" id="clear" class="slide-two"  onclick="cls()">clear</button>
+  </span>
+</div>
+
+<div class= "div_p row2" >
+
+  <span class="ta2 ta2_eng">
+    <button type="button" id="eng" class="slide-two"  onclick="eng()">eng</button>
+  </span>
+  <span class="ta2 ta2_copy">
+    <button type="button" id="cp" class="slide-two copys"  onclick="math()">math</button>
+  </span>
+  
+</div>
+
+
+<div class = 'btn_e_p row3'>
+  <div class = 'btn_plus' id='div_plus'>
+  <svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <text x="12" y="13.2" 
+        fill="green" 
+        font-size="8.8" 
+        font-family="Arial, sans-serif" 
+        font-weight="900" 
+        text-anchor="middle" 
+        dominant-baseline="middle">
+    insert
+  </text>
+</svg>
+
+  </div>
+  <div class = 'btn_mul' id='div_mul'>+</div>
+</div>
+
+<div class= "div_p" >
+</div>
+
+<p id ="doc" class= "p_size" onclick="cpy()"></p>
+<br/>
+
+
+    <!-- 第一层弹窗：右上角竖向列表 -->
+    <div id="firstModal" translate="no" class="modal" onclick="if(event.target===this)hideFirstList()">
+        <div class="modal-content" onclick="event.stopImmediatePropagation()">
+            <div class="list-container">
+                <button onclick="selectOption('word'); hideFirstList()" class="list-item">word</button>
+
+
+                <button onclick="showBufferDialog()" class="list-item buffer-item">buffer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 第二层 Buffer 列表对话框 -->
+    <div id="bufferModal" translate="no" class="modal" onclick="if(event.target===this)hideBufferDialog()">
+        <div class="modal-content" onclick="event.stopImmediatePropagation()">
+            <div class="modal-header">
+                <span>Buffer list</span>
+                <span id="bufferCount" style="font-size:14px; background:#f1f5f9; padding:4px 12px; border-radius:9999px; color:#475569;"></span>
+                <button onclick="hideBufferDialog()" class="close-btn">×</button>
+            </div>
+            
+            <div id="bufferList" class="buffer-item-list">
+                <!-- JS 动态生成 -->
+            </div>
+            
+            <div style="padding: 16px; text-align: center; font-size: 13px; color: #9ca3af; border-top: 1px solid #f1f1f1;">
+                点击任意一项即可填充到文本框
+            </div>
+        </div>
+    </div>
+
+
+
+<script>
+
+  window.buffer = [];
+  
+  window.insert_513=false
+  window.stop_setTimeout=false
+ // window.Timeout_1='';
+  window.btn_mul = document.getElementById("div_mul");
+  window.clipboard_res=""
+//---------------------------------------------------------------------------------      
+/* ---------- 工具函数 ---------- */
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const $$$ = s => document.getElementById(s);
+
+
+// --------------------------------------------------------------------------------- 
+
+  function set_pause(id){
+  //cp_reslut.textContent = "success";
+  document.getElementById(id).style.animation="none";
+  
+  //       document.getElementById(id).style.animationPlayState = 'paused';
+  
+  
+  }
+
+
+
+  function isChinese(temp){
+  var re=/[^\u4e00-\u9fa5]/;
+  if(re.test(temp)) return false;
+  return true;
+  }
+  
+  function cpy() {
+    var Url2=document.getElementById('doc').innerText;
+    
+    var really_chiness = 0;
+    var len_s = Url2.length
+    for (var k = 0 ; k < len_s; k++) {
+      if(isChinese(Url2[k])){
+        really_chiness = 1;
+        break;
+      }
+    }
+    
+    if(!really_chiness){
+    
+      doc_reslut = document.getElementById("doc");
+      doc_reslut.style.animation="blinkingText 0.3s 20 forwards";
+      //  doc_reslut.style.animation-fill-mode="forwards";
+      setTimeout(set_pause,2000,"doc");
+    }else{
+    
+      var oInput = document.createElement('input');
+      Url2 = Url2.replace("#####",'');
+      Url2 = Url2.replace("＃＃＃＃＃",'');
+      
+      oInput.value = Url2;
+      document.body.appendChild(oInput);
+      oInput.select(); // 选择对象
+      document.execCommand("Copy"); // 执行浏览器复制命令
+      oInput.className = 'oInput';
+      oInput.style.display='none';
+      //   alert(461)
+      //buffer.shift();
+      //buffer.push(Url2)
+      //     console.log("复制成功");
+      cp_reslut = document.getElementById("doc");
+      cp_reslut.style.animation="blinkingText_2 0.3s 20 forwards";
+      setTimeout(set_pause,1000,"doc");
+      //   setTimeout(set_color,100,"cp");
+      //  cp_reslut.textContent = "copy";
+      
+    }
+  }
+  
+//  ---------------------------------------------------------------------------------
+ // find . abour 800 word get_pat_pos(),then replace_pos ()add <br>
+  function nthIndex(str, pat, n){
+  var L= str.length, i= -1;
+  while(n-- && i++<L){
+  i= str.indexOf(pat, i);
+  if (i < 0) break;
+  }
+  return i;
+  }
+  
+  function countString(str, letter) {
+  let count = 0;
+  
+  // looping through the items
+  for (let i = 0; i < str.length; i++) {
+  
+  // check if the character is at that position
+  if (str.charAt(i) == letter) {
+  count += 1;
+  }
+  }
+  return count;
+  }
+  
+
+  function get_pat_pos(newstr){
+  
+  var count_pat = countString(newstr,'.');
+  var list_pos = [];
+  var cmp_num = [];
+  var len_str = newstr.length
+  
+  var t_split = Math.floor(newstr.length/800);
+  
+  //alert (t_split);
+  
+  for (var j =1  ; j <t_split+1; j++) {
+  cmp_num.push(800*j);
+  
+  }
+  
+  
+  
+  for (var k =cmp_num.length-1  ; k >-1; k--) {
+  // console.log("k : ",cmp_num[k],k )
+  for (var i = count_pat ; i >0; i--) {
+  var get_sign  = nthIndex(newstr,'.',i);
+  if (get_sign<cmp_num[k]){
+  list_pos.push(get_sign);
+  break;
+  }
+  
+  
+  }
+  }
+  
+  
+  return list_pos;
+  }
+
+
+  function replace_pos(myString,pos,character){
+  myString = myString.substring(0,pos) +
+  character +
+  myString.substring(pos, myString.length);
+  return myString;
+  
+  }
+  
+
+//---------------------------------------------------------------------------------
+  
+  function check_in_list(item,array) {
+  
+  var i = array.length;
+  
+  while (i--) {
+  if (array[i] === item) return i;
+  }
+  return -1;
+  }
+//---------------------------------------------------------------------------------
+  function hit(){
+    var c = document.getElementById("raw").value
+
+    var newstr = c.replace(/\n/g, ' ');
+    newstr = newstr.replace(/</g, '&lt;');
+    newstr= newstr.trimEnd();
+    
+
+    var end_sign = "#####";
+
+    newstr_len = newstr.length
+
+    if (newstr_len>700){
+      var less_num = get_pat_pos(newstr);
+      //alert("list : "+less_num);
+      for (var i = 0 ; i < less_num.length; i++) {
+      newstr = replace_pos(newstr,less_num[i]+1,'<br /><br />');
+      }
+      
+    }
+
+    document.getElementById('doc').innerHTML=newstr+end_sign;
+
+    setTimeout(cpy,1000);
+    
+    
+  }
+  //4 list and insert ,insert work when list greater than  4
+
+  
+  async function paste_textarea (){
+  
+    
+    
+    if(clipboard_res == ''){
+      return ;
+    }
+    else{
+      
+          var really_chiness = 0;
+    var len_s = clipboard_res.length
+    for (var k = 0 ; k < len_s; k++) {
+      if(isChinese(clipboard_res[k])){
+        really_chiness = 1;
+        break;
+      }
+    }
+    if(really_chiness){
+      return
+    }
+    
+      //insde 4 list ,compare,just 4 list 
+      if(buffer.length<1){
+        buffer.push(clipboard_res)
+        document.getElementById("raw").value = clipboard_res;
+        hit();
+        
+      }
+      else{
+        if(check_in_list(clipboard_res,buffer)!==-1){
+    
+        }else{
+        // alert("not in")
+        //buffer.shift();
+        buffer.push(clipboard_res)
+        if(insert_513){
+          document.getElementById("raw").value += clipboard_res;
+          insert_513=false
+        
+        }else{
+          document.getElementById("raw").value = clipboard_res;
+        
+        }
+        hit();
+        //  alert(JSON.stringify(buffer))
+        }
+  
+      }
+    }
+    
+  }
+  
+  
+  async function get_clipboard_real() {
+    // 1. 环境安全检查
+    if (!navigator.clipboard) {
+        console.error("当前环境不支持 Clipboard API (需 HTTPS)");
+        return null;
+    }
+
+    try {
+        // 2. 使用 await 等待 Promise 结果
+        const text = await navigator.clipboard.readText();
+
+        // 3. 逻辑处理：检查是否为空
+        if (!text || text.trim() === '') {
+            console.log("剪贴板内容为空");
+            return '';
+        }
+
+        return text.trim(); 
+    } catch (err) {
+        // 4. 捕获异常（如用户拒绝权限、页面未聚焦等）
+        console.error("读取剪贴板失败:", err);
+        return null;
+    }
+}
+
+
+
+  function check_doc_txt(){
+    
+    var  get_val = window.location.search.substr(1)
+
+    //about  empty at textarea ,the  get_clipboard
+   //安全 不干扰手动输入，低速
+    if (get_val == "use_cb=1"){
+      var check_enter ="\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
+      var raw_value= document.getElementById("raw").value;
+      if (raw_value==check_enter || raw_value=='' ){
+      
+        paste_textarea();
+      }
+      setTimeout(check_doc_txt,2000);
+    }
+    //stop_setTimeout ,then get_clipboard
+    //高速
+    else if (get_val == "use_cb=2"){
+      
+      if(stop_setTimeout==false){
+      paste_textarea();
+      }
+      
+      setTimeout(check_doc_txt,500);
+    
+    }
+    
+  }
+//  ---------------------------------------------------------------------------------
+ 
+//---------------------------------------------------------------------------------
+ 
+  function addcss(styles){
+  // Your CSS as text
+  
+  
+    var styleSheet = document.createElement("style")
+    styleSheet.innerText = styles
+    document.head.appendChild(styleSheet)
+  
+  
+  }
+//---------------------------------------------------------------------------------
+  function cls(){
+  //alert("clear");
+    document.getElementById('raw').value="\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
+    document.getElementById('doc').innerHTML="";
+  
+  
+  }
+
+
+  function eng(){
+  stop_setTimeout=true;
+ // btn_mul.style.display="block";
+    
+  //Timeout_1=setTimeout(()=>{
+   // stop_setTimeout=false;
+   // btn_mul.style.display="none";
+ // },10000)
+  var c = document.getElementById("raw").value
+  var newstr = c.replace(/\n/g, ' ');
+  newstr = newstr.replace(/</g, '&lt;');
+  
+  
+  newstr= newstr.trimEnd();
+  newstr_len = newstr.length
+  
+  //var get_sign  = nthIndex(newstr,'.',count_pat);
+  if (newstr_len>700){
+  var less_num = get_pat_pos(newstr);
+  //alert("list : "+less_num);
+  for (var i = 0 ; i < less_num.length; i++) {
+  newstr = replace_pos(newstr,less_num[i]+1,'\n');
+  }
+  }
+  
+  
+  
+  var oInput = document.createElement('input');
+  // var Url2 = Url2.replace("<font color='lime'>##@</font>",'');
+  // Url2 = Url2.replace("#####",'');
+  if(newstr==''){
+  return
+  }
+  oInput.value = newstr;
+  document.body.appendChild(oInput);
+  oInput.select(); // 选择对象
+  document.execCommand("Copy"); // 执行浏览器复制命令
+  oInput.className = 'oInput';
+  oInput.style.display='none';
+  cp_reslut = document.getElementById("eng");
+  cp_reslut.style.animation="blinkingText 0.3s 20 forwards";
+  setTimeout(set_pause,1000,"eng");
+  //   setTimeout(set_color,100,"cp");
+  cp_reslut.textContent = "eng";
+  
+    
+    
+  }
+  function math(){
+  stop_setTimeout=true;
+ // btn_mul.style.display="block";
+    
+ // Timeout_1=setTimeout(()=>{
+   // stop_setTimeout=false;
+   // btn_mul.style.display="none";
+  //},10000)
+  var c = document.getElementById("raw").value
+  var newstr = c.replace(/\n/g, ' ');
+  
+  newstr = newstr.replace(/ /g, '');
+  newstr = newstr.replace(/>/g, '/');
+  newstr = newstr.replace(/Sq/g, '->∞ ');
+  newstr = newstr.replace(/L/g, '∫ ');
+  newstr = newstr.replace(/</g, '&lt;');
+  
+  
+  newstr= newstr.trimEnd();
+  newstr_len = newstr.length
+  
+  //var get_sign  = nthIndex(newstr,'.',count_pat);
+  if (newstr_len>700){
+  var less_num = get_pat_pos(newstr);
+  //alert("list : "+less_num);
+  for (var i = 0 ; i < less_num.length; i++) {
+  newstr = replace_pos(newstr,less_num[i]+1,'\n');
+  }
+  }
+  
+  
+  
+  var oInput = document.createElement('input');
+  // var Url2 = Url2.replace("<font color='lime'>##@</font>",'');
+  // Url2 = Url2.replace("#####",'');
+  if(newstr==''){
+  return
+  }
+  oInput.value = newstr;
+  document.body.appendChild(oInput);
+  oInput.select(); // 选择对象
+  document.execCommand("Copy"); // 执行浏览器复制命令
+  oInput.className = 'oInput';
+  oInput.style.display='none';
+  cp_reslut = document.getElementById("cp");
+  cp_reslut.style.animation="blinkingText 0.3s 20 forwards";
+  setTimeout(set_pause,1000,"cp");
+  //   setTimeout(set_color,100,"cp");
+  cp_reslut.textContent = "math";
+  
+    
+    
+  }
+  function hit_textarea(){
+    
+  }
+//---------------------------------------------------------------------------------
+
+function formatLongString(str) {
+    if (str.length <= 3) return str; // 如果太短，没必要缩略
+
+    const firstTwo = str.slice(0, 2);    // 获取前两个
+    const lastOne = str.slice(-1);       // 获取最后一个
+    
+    return `${firstTwo}...${lastOne}`;
+}
+
+function formatLongString8_end(str) {
+    if (str.length <= 3) return str; // 如果太短，没必要缩略
+
+    const firstTwo = str.slice(0, 7);    // 获取前两个
+    const lastOne = str.slice(-5);       // 获取最后一个
+    
+    return `${firstTwo}...${lastOne}`;
+}
+
+
+
+// 测试
+//console.log(formatLongString("HelloWorld")); // "He...d"
+//console.log(formatLongString("JS"));         // "JS"
+
+
+
+ 
+  
+
+let intervalId = null;
+
+async function doCatStatusTask() {
+    try {
+        console.log("执行异步任务:", new Date().toLocaleTimeString());
+        
+        const get_val = window.location.search.substr(1);
+        const resz = await get_clipboard_real();
+        clipboard_res = resz;
+
+        let mode = "null";
+        if (get_val === "use_cb=1") mode = "low";
+        else if (get_val === "use_cb=2") mode = "fast";
+
+        // 切换 fast_toggle 的 active 样式
+        const fastToggle = $$$('fast_toggle');
+        if (stop_setTimeout) {
+            if (!fastToggle.classList.contains('active_fast')) {
+                fastToggle.classList.add('active_fast');
+            }
+        } else {
+            if (fastToggle.classList.contains('active_fast')) {
+                fastToggle.classList.remove('active_fast');
+            }
+        }
+
+        // 更新 DOM（建议加个简单节流）
+        $$$("mode_display").innerHTML = mode;
+        $$$("clip-infoz").innerHTML = formatLongString(resz);
+
+    } catch (e) {
+        console.error("cat_status 任务出错:", e);
+    }
+}
+
+function startCatStatus() {
+    if (intervalId) return; // 防止重复启动
+    intervalId = setInterval(doCatStatusTask, 800); // 建议间隔 800ms 以上，更稳
+}
+
+function stopCatStatus() {
+    if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+    }
+}
+
+
+
+ // ---------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
+
+
+document.addEventListener("visibilitychange", () => {
+    const isVisible = document.visibilityState === 'visible';
+
+    if (isVisible) {
+
+        
+        startCatStatus();           // 启动轮询任务
+        //stop_setTimeout = false;    // 重置停止标志
+    } else {
+
+        stopCatStatus();            // 立即停止轮询，防止后台积压
+    
+    }
+});
+        $$$('insert_toggle').addEventListener('click', (e) => {
+          e.stopPropagation();
+          
+         let isActive=  $$$('insert_toggle').classList.toggle('active');
+         // alert(38)
+          if (isActive) {
+              textarea_s = document.getElementById('raw').value;
+              document.getElementById('raw').value= textarea_s + '\n\n';
+              insert_513=true;
+            //  alert(insert_513)
+              //console.log("进入 Active 状态，执行开启逻辑");
+              // 这里写你的代码
+          } else {
+            insert_513=false;
+              console.log("退出 Active 状态，执行关闭逻辑");
+          }
+        });
+        $$$('fast_toggle').addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            let isactive_f=$$$('fast_toggle').classList.toggle('active_fast');
+           // alert(38)
+          if (isactive_f) {
+              stop_setTimeout=true
+            //  alert(insert_513)
+              //console.log("进入 Active 状态，执行开启逻辑");
+              // 这里写你的代码
+          } else {
+            stop_setTimeout=false
+              console.log("退出 Active 状态，执行关闭逻辑");
+          }
+   
+        });
+
+
+  
+  window.onload = check_doc_txt;
+  
+startCatStatus(); 
+  
+const isWebView = () => {
+  const ua = window.navigator.userAgent;
+  const isAndroid = /Android/i.test(ua);
+  const isIos = /iPhone|iPad|iPod/i.test(ua);
+
+  if (isAndroid) {
+    // Android WebView 通常包含 "wv"
+    return /wv/i.test(ua) || /Version\/[\d.]+/i.test(ua);
+  }
+  
+  if (isIos) {
+    // iOS WebView 的特征是不包含 "Safari" 关键字，但包含 "AppleWebKit"
+    return /AppleWebKit/i.test(ua) && !/Safari/i.test(ua);
+  }
+
+  return false;
+};
+
+
+if(!isWebView()){
+// 只有在用户与页面产生过交互（点击、输入）后，此拦截才会生效
+window.addEventListener('beforeunload', (event) => {
+    // 现代浏览器不再支持自定义文字，只能触发系统默认提示
+    event.preventDefault();
+    event.returnValue = ''; 
+});
+}
+
+
+        
+</script>
+<script>
+$$$('morez').onclick= function (e){
+  showFirstList()
+}
+          function showFirstList() {
+            document.getElementById('firstModal').style.display = 'flex';
+        }
+
+        function hideFirstList() {
+            document.getElementById('firstModal').style.display = 'none';
+        }
+
+        function selectOption(n) {
+          if(n=='word'){
+          urlz="https://gxjnd.github.io/translate/word.html"
+            window.location.href = urlz;
+            //"https://www.google.com";
+//ps://www.google.com";
+
+       //     alert(7)
+          }
+      //      document.getElementById('raw').value = `已选择操作 ${n}`;
+        }
+
+        // ==================== 第二层 Buffer 对话框 ====================
+        function showBufferDialog() {
+            hideFirstList();
+            
+            const modal = document.getElementById('bufferModal');
+            const listContainer = document.getElementById('bufferList');
+            const countEl = document.getElementById('bufferCount');
+            
+            countEl.textContent = `${window.buffer.length} 项`;
+            listContainer.innerHTML = '';
+
+// 使用 [...window.buffer] 创建副本并反转，确保不影响原数据
+[...window.buffer].reverse().forEach((item, index) => {
+    // 注意：这里的 index 是反转后的索引
+    // 如果你想显示原数组对应的真实编号，需要重新计算
+    const originalIndex = window.buffer.length - 1 - index;
+
+    const div = document.createElement('div');
+    div.className = 'buffer-single-item';
+    
+    div.innerHTML = `
+        <span class="item-number">${(originalIndex + 1).toString().padStart(2, '0')}</span>
+        <span style="flex:1;">${formatLongString8_end(item)} {${item.length}}</span>
+    `;
+
+    div.onclick = () => {
+        document.getElementById('raw').value = item;
+        hit()
+        hideBufferDialog();
+        
+        const textarea = document.getElementById('raw');
+        textarea.style.transition = 'background 0.4s';
+        textarea.style.background = '#ecfdf5';
+        setTimeout(() => { textarea.style.background = '#fafafa'; }, 700);
+    };
+
+    listContainer.appendChild(div);
+});
+
+            modal.style.display = 'flex';
+        }
+
+        function hideBufferDialog() {
+            document.getElementById('bufferModal').style.display = 'none';
+        }
+
+
+</script>
+
+</body>
+</html>
