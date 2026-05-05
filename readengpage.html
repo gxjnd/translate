@@ -186,7 +186,7 @@
         function copyCurrent() {
             if (paragraphs.length === 0) return;
             const text = paragraphs[currentIndex];
-           // alert(text)
+           // 
             navigator.clipboard.writeText(text).then(() => {
                 const orig = event.target.textContent;
                 event.target.textContent = '已複製！';
