@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport"
+    content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+
+   
+    <title>段落閱讀器</title>
+    <style>
+        body {
+          position: relative ;
+            font-family: "Microsoft JhengHei", "Segoe UI", sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .container {
+            width: 100%;
+            
+            max-width: 800px;
+            background: white;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            height: 100vh;
+            overflow: auto;
+        }
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        button {
+            padding: 10px 16px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .btn-prev { background: #3498db; color: white; }
+        .btn-next { background: #3498db; color: white; }
+        .btn-copy { background: #27ae60; color: white; }
+        .btn-paste { background: #f39c12; color: white; }
+        .btn-full { background: #9b59b6; color: white; }
+        .btn-copy:active {
+          background:red;
+          
+        }
+        
+     #current-num{
+       color:red;
+       font-weight:700;
+       font-size:25px;
+     }   
+        .content {
+          
+            padding: 40px 30px;
+            min-height: 60vh;
+            font-size: 18px;
+            line-height: 1.8;
+            color: #333;
+            background:white;
+            overflow:auto;
+        }
+        .paragraph {
+            white-space: nowrap;
+        }
+        .info {
+            padding: 10px 20px;
+            background: #ecf0f1;
+            font-size: 14px;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 0px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+        }
+        .footer {
+            padding: 15px 20px;
+            background: #34495e;
+            color: white;
+            text-align: center;
+            font-size: 14px;
+        }
+        #input-text{
+          width:90%;
+        }
+        
+.div_upload {
+  all: unset;
+position: absolute;
+top:10px;
+right:10px;
+
+cursor: pointer;
+border: none;
+
+width: 32px;
+height: 32px;
+margin-left: 4px;
+flex: 0 0 35px; 
+border-radius: 8px;
+border: 2px solid transparent;
+background: white;
+display: flex;
+align-items: center;
+justify-content: center;
+/* 动画过渡 */
+-webkit-tap-highlight-color: transparent;
+z-index:9999;
+}
+
+#fileInput{
+display:none;
+}
+
+   .noshow{
+     display:none;
+   }     
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 頂部按鈕區 -->
+        <div class="header">
+            <button class="btn-prev" onclick="prevParagraph()">back</button>
+            <button class="btn-next" onclick="nextParagraph()">next</button>
+            <button class="btn-copy" onclick="copyCurrent()">copy</button>
+            <button class="btn-paste" onclick="pasteToInput()">paste</button>
+      
+            <span style="margin-right: auto; color: white;">
+                 <span id="current-num">1</span> /    <span id="total-num">0</span>  page
+            </span>
+        </div>
+
+        <!-- 文字顯示區 -->
+        <div class="content" id="content">
+            <div class="paragraph" id="current-paragraph">
+                
+            </div>
+        </div>
+
+        <!-- 資訊欄 -->
+        <div class="info noshow" >
+            <span>目前顯示第 <strong id="info-current">1</strong> 段</span>
+            <span>總段落數: <strong id="info-total">0</strong></span>
+        </div>
+
+        <!-- 輸入區 -->
+        <div style="padding: 20px;" class="noshow">
+            <h3>輸入文字（使用 #### 分隔段落）</h3>
+            <textarea id="input-text" placeholder="在此輸入文字，每段之間用 #### 分隔..."></textarea>
+            <div style="margin-top: 10px;">
+                <button onclick="loadText()" style="background:#2980b9;color:white;">載入文字並開始閱讀</button>
+                <button onclick="clearAll()" style="background:#e74c3c;color:white;">清除全部</button>
+            </div>
+        </div>
+
+        <div class="footer noshow" >
+            段落閱讀器 • 按鈕版 • 使用 #### 作為段落分隔符
+        </div>
+    </div>
+<script>
+// html-tag-js@1.1.41 - 可读版（单个函数 + 扩展）
+function tag(element, props = {}) {
+// 如果第二个参数是字符串，自动转为 innerHTML
+if (typeof props === "string") {
+props = { innerHTML: props };
+}
+
+// 支持函数组件（高级用法）
+if (typeof element === "function") {
+return element(props, arguments[2]);
+}
+
+// 如果传入已有 DOM 节点，直接返回
+if (element instanceof Node) {
+return element;
+}
+
+// 必须是字符串标签名
+if (typeof element !== "string") {
+throw new Error(`Invalid tag: ${typeof element}`);
+}
+
+const el = document.createElement(element);
+
+// 处理属性
+Object.keys(props).forEach(key => {
+let value = props[key];
+if (value === undefined) return;
+
+switch (key) {
+case "child":
+appendChild(el, value);
+break;
+
+case "children":
+if (!Array.isArray(value)) {
+throw new Error("children must be an array of Nodes");
+}
+value.flat().forEach(child => appendChild(el, child));
+break;
+
+case "attr":
+Object.keys(value).forEach(attrKey => {
+const attrVal = value[attrKey];
+if (attrVal !== undefined) el.setAttribute(attrKey, attrVal);
+});
+break;
+
+case "style":
+case "dataset":
+Object.keys(value).forEach(subKey => {
+const subVal = value[subKey];
+if (subVal !== undefined) el[key][subKey] = subVal;
+});
+break;
+
+case "ref":
+if (value && value.instanceOfRef) value.el = el;
+break;
+
+default:
+el[key] = value;
+}
+});
+
+return el;
+}
+
+// 辅助函数：追加子节点（支持字符串自动转文本）
+function appendChild(parent, child) {
+if (!(child instanceof Node)) {
+child = document.createTextNode(String(child));
+}
+// 支持响应式文本节点（tag.use）的 clone
+if (child instanceof Text && typeof child.clone === "function") {
+child = child.clone();
+}
+parent.append(child);
+}
+
+// === 内置扩展方法（与官方完全一致）===
+Object.defineProperties(tag, {
+get: {
+value: selector => document.querySelector(selector)
+},
+getAll: {
+value: selector => Array.from(document.querySelectorAll(selector))
+},
+parse: {
+value: html => {
+const div = document.createElement("div");
+div.innerHTML = html;
+return div.childElementCount === 1
+? div.firstElementChild
+: Array.from(div.children);
+}
+},
+text: {
+value: str => document.createTextNode(str)
+},
+use: {
+value: (initial = "") => {
+let value = initial;
+let isCloned = false;
+const node = document.createTextNode(initial);
+const clones = [node];
+
+Object.defineProperty(node, "value", {
+set: v => {
+value = v;
+clones.forEach(c => (c.textContent = v));
+},
+get: () => value
+});
+
+Object.defineProperty(node, "clone", {
+value: () => {
+if (!isCloned) {
+isCloned = true;
+return node;
+}
+const clone = node.cloneNode();
+clones.push(clone);
+return clone;
+}
+});
+
+return node;
+}
+}
+});
+
+// 自动全局暴露（浏览器环境）
+if (typeof window !== "undefined" && !window.tag) {
+window.tag = tag;
+}
+</script>
+    <script>
+let upload_svg=`
+<svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<text x="12" y="13.2" 
+fill="#000" 
+font-size="7.8" 
+font-family="Arial, sans-serif" 
+font-weight="900" 
+text-anchor="middle" 
+dominant-baseline="middle">
+upload
+</text>
+</svg>
+`
+
+
+const div_upload_ele = tag('button', {
+id: 'div_uploadz',
+className: 'div_upload',
+innerHTML:upload_svg
+});
+const input_file_ele = tag('input', {
+    type:'file' ,
+    id: 'fileInput'
+    
+  });
+
+document.body.append(input_file_ele,div_upload_ele)
+//---------------------------------------------------------------------------------
+   const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const $$$ = s => document.getElementById(s);
+// ---------------------------------------------------------------------------------
+ 
+    var pagestr = `
+
+
+    `;
+    
+    if(localStorage.getItem("pagestr")){
+      pagestr=localStorage.getItem("pagestr")
+    }
+
+ 
+ 
+    
+        let paragraphs = [];
+        let currentIndex = 0;
+function processText(rawText) {
+  // 将字符串按行拆分为数组（兼容 Windows 和 Unix 换行符）
+  let lines = rawText.split(/\r?\n/);
+  const totalLines = lines.length;
+  
+  // 插入的内容
+  const separator = "\n\n--------------------------------------------------------------------------------- \n";
+  const punctuation = ["。", "."];
+
+  // 从第 20 行开始（索引为 19）
+  let currentIndex = 19;
+
+  while (currentIndex < totalLines) {
+    let line = lines[currentIndex];
+    let found = false;
+
+    // 检查当前行是否包含定义的标点
+    for (let p of punctuation) {
+      if (line.includes(p)) {
+        // 替换该行中所有的句号（如果只想替换第一个，去掉 /g）
+        // 这里模拟 Python 的 replace，将标点替换为“标点+分割线”
+        const regex = new RegExp(`\\${p}`, 'g'); 
+        lines[currentIndex] = line.replace(regex, `${p}${separator}`);
+        
+        found = true;
+        break; // 找到一种标点后跳出当前行的查找
+      }
+    }
+
+    if (found) {
+      // 如果处理了，向后跳转 20 行
+      currentIndex += 20;
+    } else {
+      // 如果没找到，检查下一行
+      currentIndex += 1;
+    }
+  }
+
+  // 重新合并为字符串
+  return lines.join('\n');
+}
+
+        function splitText(text) {
+            return text.split(/--------------------------------------------------------------------------------- \s*/).map(p => p.trim()).filter(p => p.length > 0);
+        }
+
+        function loadText() {
+            //const input = document.getElementById('input-text').value;
+            let input=pagestr;
+            if (!input.trim()) {
+                //alert('請輸入文字');
+                return;
+            }
+            paragraphs = splitText(input);
+            currentIndex = 0;
+            renderCurrent();
+        }
+
+        function renderCurrent() {
+            if (paragraphs.length === 0) return;
+            
+            document.getElementById('current-paragraph').innerHTML = 
+                paragraphs[currentIndex].replace(/\n/g, '<br>');
+            
+            document.getElementById('current-num').textContent = currentIndex + 1;
+            document.getElementById('total-num').textContent = paragraphs.length;
+            document.getElementById('info-current').textContent = currentIndex + 1;
+            document.getElementById('info-total').textContent = paragraphs.length;
+        }
+
+        function prevParagraph() {
+            if (paragraphs.length === 0) return;
+            currentIndex = (currentIndex - 1 + paragraphs.length) % paragraphs.length;
+            renderCurrent();
+        }
+
+        function nextParagraph() {
+            if (paragraphs.length === 0) return;
+            currentIndex = (currentIndex + 1) % paragraphs.length;
+            renderCurrent();
+        }
+
+        function copyCurrent() {
+            if (paragraphs.length === 0) return;
+            const text = paragraphs[currentIndex];
+            navigator.clipboard.writeText(text).then(() => {
+                const orig = event.target.textContent;
+                event.target.textContent = '已複製！';
+                setTimeout(() => {
+                    event.target.textContent = orig;
+                }, 1500);
+            });
+        }
+
+        function pasteToInput() {
+            navigator.clipboard.readText().then(text => {
+                document.getElementById('input-text').value = text;
+            }).catch(() => {
+                alert('無法讀取剪貼簿');
+            });
+        }
+
+        function clearAll() {
+            if (confirm('確定要清除全部內容嗎？')) {
+                document.getElementById('input-text').value = '';
+                paragraphs = [];
+                currentIndex = 0;
+                document.getElementById('current-paragraph').innerHTML = 
+                    '請先在下方輸入文字，並以 #### 分隔段落';
+                document.getElementById('current-num').textContent = '1';
+                document.getElementById('total-num').textContent = '0';
+            }
+        }
+
+        function showFullHTML() {
+            const html = document.documentElement.outerHTML;
+            const newWin = window.open('', '_blank');
+            newWin.document.write('<pre>' + html.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>');
+            newWin.document.close();
+        }
+
+        // 鍵盤快捷鍵
+        document.addEventListener('keydown', function(e) {
+            if (e.key === "ArrowRight") nextParagraph();
+            if (e.key === "ArrowLeft") prevParagraph();
+        });
+
+        // 範例文字
+        window.onload = function() {
+           // const example = `這是第一段文字的內容。\n\n這裡可以有很多內容。####\n\n這是第二段，使用####分隔。\n\n可以有很多行。####\n\n第三段內容...`;
+             //document.getElementById('input-text').value = example;
+            loadText();
+        };
+ 
+ 
+$$$('fileInput').onchange = (e) => {
+        //alert(1)
+        //const file = input.files[0];
+        const file = e.target.files[0];
+        let inputElement=e.target
+        if (!file) return;
+        //alert(2)
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+              //alert(1)
+               // const data = JSON.parse(e.target.result);
+              //  if (!Array.isArray(data)) throw new Error("无效的备份文件格式");
+              //alert(e.target.result)
+              
+            localStorage.clear();
+            //mastered = [];
+           // unfamiliar = [];
+            //allWords = [];
+              let ssz= "---------------------------------------------------------------------------------"
+              let midstr
+              if(e.target.result.includes(ssz)){
+                //alert("has ----")
+                midstr=e.target.result
+              }else{
+                midstr= processText(e.target.result)
+             
+              }
+ 
+              pagestr=midstr;
+            localStorage.setItem("pagestr", pagestr);
+          
+             // init()
+             // render()
+             loadText()
+              inputElement.value = ""; // 清空 input
+                //const transaction = db.transaction([STORE_NAME], "readwrite");
+                //const store = transaction.objectStore(STORE_NAME);
+
+                /*data.forEach(item => {
+                    // 删除旧 ID 以免冲突（或者保留，取决于需求）
+                    delete item.id; 
+                    store.add(item);
+                });*/
+
+               // transaction.oncomplete = () => {
+                  //  alert("数据导入成功！");
+                    //renderList();
+                    
+              //  };
+            } catch (err) {
+                alert("导入失败: " + err.message);
+            }
+        };
+        reader.readAsText(file);
+  };
+
+$$$('div_uploadz').onclick = (e) => {
+$$$('fileInput').click();
+}
+ 
+
+ 
+    </script>
+</body>
+</html>
