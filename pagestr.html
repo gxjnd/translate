@@ -358,15 +358,23 @@ const $$$ = s => document.getElementById(s);
 
     `;
     
+          let paragraphs = [];
+        let currentIndex = 0;  
+ //   --------------------------------------------------------------------------------- 
+    
     if(localStorage.getItem("pagestr")){
       pagestr=localStorage.getItem("pagestr")
     }
-
+    if (localStorage.getItem("currentIndexz")) {
+        //alert(5)
+        currentIndex = parseInt(localStorage.getItem("currentIndexz")) || 0;
+      //  alert(currentIndex)
+      
+    }
  
  
     
-        let paragraphs = [];
-        let currentIndex = 0;
+
 function processText(rawText) {
   // 将字符串按行拆分为数组（兼容 Windows 和 Unix 换行符）
   let lines = rawText.split(/\r?\n/);
@@ -421,7 +429,7 @@ function processText(rawText) {
                 return;
             }
             paragraphs = splitText(input);
-            currentIndex = 0;
+           // currentIndex = 0;
             renderCurrent();
         }
 
@@ -435,6 +443,8 @@ function processText(rawText) {
             document.getElementById('total-num').textContent = paragraphs.length;
             document.getElementById('info-current').textContent = currentIndex + 1;
             document.getElementById('info-total').textContent = paragraphs.length;
+            localStorage.setItem("currentIndexz", currentIndex);
+          
         }
 
         function prevParagraph() {
@@ -487,21 +497,25 @@ function processText(rawText) {
             newWin.document.write('<pre>' + html.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>');
             newWin.document.close();
         }
+//---------------------------------------------------------------------------------
+    
+        // 範例文字
+        window.onload = function() {
+           // const example = `這是第一段文字的內容。\n\n這裡可以有很多內容。####\n\n這是第二段，使用####分隔。\n\n可以有很多行。####\n\n第三段內容...`;
+             //document.getElementById('input-text').value = example;
 
+            loadText();
+        };
+ 
+ 
+
+ //  --------------------------------------------------------------------------------- 
         // 鍵盤快捷鍵
         document.addEventListener('keydown', function(e) {
             if (e.key === "ArrowRight") nextParagraph();
             if (e.key === "ArrowLeft") prevParagraph();
         });
 
-        // 範例文字
-        window.onload = function() {
-           // const example = `這是第一段文字的內容。\n\n這裡可以有很多內容。####\n\n這是第二段，使用####分隔。\n\n可以有很多行。####\n\n第三段內容...`;
-             //document.getElementById('input-text').value = example;
-            loadText();
-        };
- 
- 
 $$$('fileInput').onchange = (e) => {
         //alert(1)
         //const file = input.files[0];
@@ -533,7 +547,8 @@ $$$('fileInput').onchange = (e) => {
  
               pagestr=midstr;
             localStorage.setItem("pagestr", pagestr);
-          
+     localStorage.setItem("currentIndexz", 0);
+        currentIndex = 0;       
              // init()
              // render()
              loadText()
