@@ -150,14 +150,14 @@ display:none;
   align-items: center;
   justify-content: center;
   border: none;
-  background-color: green;
+  background-color: transparent;
   cursor: pointer;
   font-size: 20px;
   top:100px;
   right:30px;
   transform: rotate(45deg);
   outline: none;
-  
+  border: 1px solid #ccc;
   /* Removes the blue/grey tap highlight box on mobile devices (iOS/Android) */
   -webkit-tap-highlight-color: transparent;
 }
@@ -168,11 +168,14 @@ display:none;
 .file_name{
   font-weight:700;
 }
+.includes_word{
+  background:#f3fcf2;
+}
     </style>
 </head>
 <body>
 
-<label for="json-file-input" class="square-upload-btn" title="Upload JSON">h</label>
+<label for="json-file-input" class="square-upload-btn" title="Upload JSON">u</label>
 <button class="cancel_btn" id="clear-btn">+</button>
 
 
@@ -184,7 +187,7 @@ display:none;
         <!-- 控制与输入面板 -->
         <div class="control-panel">
 
-            <input type="text" id="input_wordz" placeholder="" oninput="fun_input_word()">
+            <input type="text" id="input_wordz" placeholder="" >
         </div>
 
         <!-- 模仿 aGrep 的查询结果展示界面 -->
@@ -229,12 +232,26 @@ display:none;
     function fun_input_word() {
         const inputField = document.getElementById('input_wordz');
         const userInput = inputField.value.trim().toLowerCase();
-        
+        if (userInput.length == 1) {
+    return;
+}
+
         if (userInput && userInput !== lastClipboard) {
             lastClipboard = userInput;
+            stopCatStatus()
             processQuery(userInput);
+            startCatStatus()
         }
     }
+
+function highlightWord(str, keyword) {
+  // 创建一个全局且忽略大小写的正则，用来匹配关键字
+  const regex = new RegExp(`(${keyword})`, 'gi');
+  
+  // 将匹配到的关键字替换为带高亮 span 标签的 HTML
+  return str.replace(regex, '<span class="highlight-word">$1</span>');
+}
+
 
     // 查询逻辑并渲染成截图对应的 UI 格式
     function processQuery(word) {
@@ -251,9 +268,71 @@ display:none;
             <span class="highlight-word">${word}</span> ${entry[0]} &lt; &gt;
             
             `;
+          const resultEntries = Object.entries(loadedData)
+  .filter( function ([key]) { 
+    if (key!==word){
+    return key.includes(word)
+    }
+    
+  });
+
+let all_s=''
+for (let i = 0; i < resultEntries.length; i++) {
+       //     alert (JSON.stringify(resultEntries[i]))
+            let s_one = `
+            <div class="file_name">
+            ${resultEntries[i][1][0][1]}
+            </div>
+            ${highlightWord(resultEntries[i][0],word)}
+            
+            
+            ${resultEntries[i][1][0][0]} &lt; &gt;
+            
+            `;
+            all_s= all_s+s_one
+  
+}
+
+let res_s=`<div class="includes_word">${all_s}</div>`
+            outputDiv.innerHTML = outputDiv.innerHTML +res_s
+            
+            
        
         } else {
-            outputDiv.innerHTML = `<span class="highlight-word">null</span> `;
+          const resultEntries = Object.entries(loadedData)
+  .filter( function ([key]) { 
+    
+    return key.includes(word)
+    
+    
+  });
+
+let all_s=''
+if(resultEntries.length==0){
+  outputDiv.innerHTML=`<span class="highlight-word">null</span>`
+  return
+}
+for (let i = 0; i < resultEntries.length; i++) {
+       //     alert (JSON.stringify(resultEntries[i]))
+            let s_one = `
+            <div class="file_name">
+            ${resultEntries[i][1][0][1]}
+            </div>
+            ${highlightWord(resultEntries[i][0],word)}
+            
+            
+            ${resultEntries[i][1][0][0]} &lt; &gt;
+            
+            `;
+            all_s= all_s+s_one
+  
+}
+
+let res_s=`<div class="includes_word">${all_s}</div>`
+            outputDiv.innerHTML = res_s
+
+          
+          
         }
     }
 //---------------------------------------------------------------------------------    
@@ -323,10 +402,12 @@ async function doCatStatusTask() {
             // 例如：自动填入输入框、自动执行查询等
             // ==========================================
           //  handleNewClipboardData(resz);
-          if(resz.length<20){
+          if(resz.length>1 &&resz.length<20){
             inputField.value = resz;
             var s=resz.trim().toLowerCase()
+            stopCatStatus()
             processQuery(s);
+            startCatStatus()
           }
         }
 
@@ -339,7 +420,7 @@ async function doCatStatusTask() {
 function startCatStatus() {
     if (intervalId) return; 
     
-    intervalId = setInterval(doCatStatusTask, 200); 
+    intervalId = setInterval(doCatStatusTask, 500); 
 }
 
 // 停止轮询
@@ -373,6 +454,25 @@ document.addEventListener("visibilitychange", () => {
 //alert(90)
 
 //---------------------------------------------------------------------------------
+// 1. 定义防抖工具函数
+function debounce(fn, delay) {
+    let timer = null;
+    return function (...args) {
+        // 每次触发事件时，先清除上一个定时器
+        if (timer) clearTimeout(timer);
+        
+        // 设置新的定时器
+        timer = setTimeout(() => {
+            fn.apply(this, args);
+        }, delay);
+    };
+}
+
+
+// 3. 将防抖处理后的函数绑定到输入框
+const inputElement = document.getElementById('input_wordz');
+// 延迟 300 毫秒执行，可根据实际需求调整时间
+inputElement.addEventListener('input', debounce(fun_input_word, 600));
 
 //---------------------------------------------------------------------------------
  //  alert(8)
@@ -397,3 +497,5 @@ document.addEventListener("visibilitychange", () => {
 
 </body>
 </html>
+
+
