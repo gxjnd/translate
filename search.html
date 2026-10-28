@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>aGrep Dictionary LookUp</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        /* 顶部绿色导航栏仿照截图 */
+        .header {
+            background-color: #8bc34a;
+            color: #000;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header .back-arrow {
+            margin-right: 15px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .container {
+            flex: 1;
+            padding: 15px;
+            box-sizing: border-box;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            margin-top:0px;
+        }
+        .control-panel {
+            background: transparent;
+            padding: 1px;
+            border-radius: 0px;
+            margin-bottom: 1px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            font-size: 13px;
+            color: #555;
+        }
+        input[type="file"], input[type="text"] {
+            width: 100%;
+            padding: 19px 10px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 19px;
+            margin-bottom: 10px;
+        }
+        .file-info {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        /* 模仿搜索结果区域 */
+        .result-screen {
+            flex: 1;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 15px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+        .meta-info {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+        .result-item {
+            font-size: 16px;
+            line-height: 1.5;
+            word-break: break-all;
+        }
+        /* 高亮单词红色样式 */
+        .highlight-word {
+            color: #e53935;
+            font-weight: bold;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 0px;
+            font-size: 11px;
+            background: #ff5722;
+            color: #fff;
+            float: right;
+        }
+        .status-active {
+            background: #4caf50;
+        }
+        
+        
+#json-file-input {
+  display: inline-block;
+  font-size: small;
+  padding: 4px;
+  border-radius: 4px;
+  background-color: #f0f0f0;
+display:none;
+  
+}
+
+.square-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  font-size: 14px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  position : absolute ;
+  right:10px;
+}
+
+.square-upload-btn:hover {
+  background-color: #e0e0e0;
+}
+.cancel_btn {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  
+  /* Optional: Center the '+' symbol and style it nicely */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background-color: green;
+  cursor: pointer;
+  font-size: 20px;
+  top:100px;
+  right:30px;
+  transform: rotate(45deg);
+  outline: none;
+  
+  /* Removes the blue/grey tap highlight box on mobile devices (iOS/Android) */
+  -webkit-tap-highlight-color: transparent;
+}
+.cancel_btn:active {
+  background:black;
+  color:white;
+}
+.file_name{
+  font-weight:700;
+}
+    </style>
+</head>
+<body>
+
+<label for="json-file-input" class="square-upload-btn" title="Upload JSON">h</label>
+<button class="cancel_btn" id="clear-btn">+</button>
+
+
+
+    <!-- 模仿截图顶部的绿色 App 栏 -->
+            <input type="file" id="json-file-input" accept=".json" onchange="handleFileUpload(event)">
+
+    <div class="container">
+        <!-- 控制与输入面板 -->
+        <div class="control-panel">
+
+            <input type="text" id="input_wordz" placeholder="" oninput="fun_input_word()">
+        </div>
+
+        <!-- 模仿 aGrep 的查询结果展示界面 -->
+        <div class="result-screen" id="result-screen">
+            <div id="output-content" class="result-item">
+            </div>
+        </div>
+    </div>
+
+<script>
+    // 默认内置测试数据（模仿截图内容）
+    let loadedData = {
+        "hi": [["n. 缺点, 不利, 坏处", "a.txt"]]
+    };
+    let lastClipboard = "";
+
+    // 处理文件上传
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const jsonString = e.target.result;
+                loadedData = JSON.parse(jsonString);
+                
+                // === 核心代码：将 JSON 字符串保存到 localStorage ===
+                localStorage.setItem('agrep_dictionary_data', jsonString);
+                // ============================================
+ // alert(9)
+               // document.getElementById('file-status').textContent = `状态: 成功加载文件 "${file.name}"`;
+            } catch (err) {
+                document.getElementById('file-status').textContent = `状态: JSON 解析错误 (${err.message})`;
+                loadedData = {};
+            }
+        };
+        reader.readAsText(file, "UTF-8");
+    }
+
+    // 监控剪贴板输入并更新UI
+    function fun_input_word() {
+        const inputField = document.getElementById('input_wordz');
+        const userInput = inputField.value.trim().toLowerCase();
+        
+        if (userInput && userInput !== lastClipboard) {
+            lastClipboard = userInput;
+            processQuery(userInput);
+        }
+    }
+
+    // 查询逻辑并渲染成截图对应的 UI 格式
+    function processQuery(word) {
+        const outputDiv = document.getElementById('output-content');
+        
+        if (loadedData.hasOwnProperty(word)) {
+            const entry = loadedData[word][0];
+            const file = loadedData[word][0][1];
+            // 格式：红色的单词 + 对应释义，完美契合截图版式
+            outputDiv.innerHTML = `
+            <div class="file_name">
+            ${file}
+            </div>
+            <span class="highlight-word">${word}</span> ${entry[0]} &lt; &gt;
+            
+            `;
+       
+        } else {
+            outputDiv.innerHTML = `<span class="highlight-word">null</span> `;
+        }
+    }
+//---------------------------------------------------------------------------------    
+  
+    document.getElementById('clear-btn').addEventListener('click', function() {
+        const inputField = document.getElementById('input_wordz');
+        const outputDiv = document.getElementById('output-content');
+        
+        inputField.value = '';
+        outputDiv.innerHTML = '';
+       // lastClipboard = '';
+        inputField.focus();
+    });
+
+//---------------------------------------------------------------------------------
+let intervalId = null;
+let clipboard_res = "";
+let lastClipboard_real = ""; // 用于去重，避免重复触发
+
+// 异步读取剪贴板的函数
+  async function get_clipboard_real() {
+    // 1. 环境安全检查
+    if (!navigator.clipboard) {
+        console.error("当前环境不支持 Clipboard API (需 HTTPS)");
+        return null;
+    }
+
+    try {
+        // 2. 使用 await 等待 Promise 结果
+        const text = await navigator.clipboard.readText();
+
+        // 3. 逻辑处理：检查是否为空
+        if (!text || text.trim() === '') {
+            console.log("剪贴板内容为空");
+            return '';
+        }
+
+        return text.trim(); 
+    } catch (err) {
+        // 4. 捕获异常（如用户拒绝权限、页面未聚焦等）
+        console.error("读取剪贴板失败:", err);
+        return null;
+    }
+}
+
+// 轮询执行的任务
+async function doCatStatusTask() {
+    try {
+      
+        // 1. 获取最新剪贴板内容
+        const resz = await get_clipboard_real();
+        if (!resz) return;
+        
+        clipboard_res = resz;
+
+        // 2. 核心去重判断：如果内容跟上一次不同，说明有了新复制的内容
+        if (resz !== lastClipboard_real) {
+            lastClipboard_real = resz;
+            console.log(`📋 [检测到新剪贴板内容]: ${resz}`);
+           // alert(resz)
+            const inputField = document.getElementById('input_wordz');
+           // inputField.value = resz;
+
+       
+            // ==========================================
+            // 在这里编写检测吗到新剪贴板后的自定义业务逻辑
+            // 例如：自动填入输入框、自动执行查询等
+            // ==========================================
+          //  handleNewClipboardData(resz);
+          if(resz.length<20){
+            inputField.value = resz;
+            var s=resz.trim().toLowerCase()
+            processQuery(s);
+          }
+        }
+
+    } catch (e) {
+        console.error("剪贴板监听任务出错:", e);
+    }
+}
+
+// 启动轮询（建议间隔 800ms ~ 1000ms，平衡性能与实时性）
+function startCatStatus() {
+    if (intervalId) return; 
+    
+    intervalId = setInterval(doCatStatusTask, 200); 
+}
+
+// 停止轮询
+function stopCatStatus() {
+    if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+    }
+}
+
+
+// 监听页面的可见性变化
+document.addEventListener("visibilitychange", () => {
+    const isVisible = document.visibilityState === 'visible';
+
+    if (isVisible) {
+        startCatStatus(); // 切回前台时，恢复轮询
+    } else {
+        stopCatStatus();  // 切到后台时，立即停止轮询
+    }
+});
+
+// 页面加载完毕后默认启动一次
+
+
+
+
+    startCatStatus();
+
+
+//alert(90)
+
+//---------------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------------
+ //  alert(8)
+    function initLocalStorageData() {
+        const savedData = localStorage.getItem('agrep_dictionary_data');
+        if (savedData) {
+            try {
+                loadedData = JSON.parse(savedData);
+            //    alert(9)
+                console.log("成功从 LocalStore 恢复词典数据，条目数:", Object.keys(loadedData).length);
+            } catch (err) {
+                console.error("恢复 LocalStore 数据失败:", err);
+                localStorage.removeItem('agrep_dictionary_data'); // 清理损坏的数据
+            }
+        }
+    }
+
+    // 页面运行之初立即执行读取
+    initLocalStorageData();
+
+</script>
+
+</body>
+</html>
