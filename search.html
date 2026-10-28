@@ -175,7 +175,7 @@ display:none;
 </head>
 <body>
 
-<label for="json-file-input" class="square-upload-btn" title="Upload JSON">u</label>
+<button  class="square-upload-btn" id ="load_json_local">u</label>
 <button class="cancel_btn" id="clear-btn">+</button>
 
 
@@ -473,6 +473,35 @@ function debounce(fn, delay) {
 const inputElement = document.getElementById('input_wordz');
 // 延迟 300 毫秒执行，可根据实际需求调整时间
 inputElement.addEventListener('input', debounce(fun_input_word, 600));
+//---------------------------------------------------------------------------------
+async function loadJson() {
+    try {
+        const response = await fetch('./my_dictionary.json'); // 假设同级目录下有一个 data.json
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+      localStorage.setItem('agrep_dictionary_data', JSON.stringify(data));
+        
+        console.log('读取成功:', data);
+    } catch (error) {
+        console.error('读取失败:', error);
+    }
+}
+
+loadJson();
+
+
+// 1. 获取元素并绑定点击事件
+document.getElementById('load_json_local').addEventListener('click', async function() {
+    console.log('按钮被点击了，开始加载 JSON...');
+    //alert(8)
+    // 可以在这里调用之前提到的读取 JSON 的函数
+    loadJson(); 
+});
+
+
+
 
 //---------------------------------------------------------------------------------
  //  alert(8)
